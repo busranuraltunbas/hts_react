@@ -12,36 +12,58 @@ const Login = () => {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [loading, setLoding] = useState(false);
-    const {backendUrl} = useContext(AppContext);
+    const [loading, setLoading] = useState(false);
+    const {backendURL, setIsLoggedIn, getUserData} = useContext(AppContext);
     const navigate = useNavigate();
     
     
 
-    const onSubmitHandler = async (e) =>{
-        e.prevenDefault();
-        axios.defaults.withCredentials = true;
-        setLoding(true);
-        try{
-            if(isCreateAccount){
-                //register API
-                const response = await axios.post(`${backendUrl}/register`, {name, email, password})
-                if(response.status === 201){
-                    navigate("/");
-                    toast.success("Hesap başarıyla oluşturuldu.");
-                }else{
-                    toast.error("E-posta zaten mevcut.");
-                }
-            }else{
-                //login API
+    const onSubmitHandler = async (e) => {
+    e.preventDefault();
+    axios.defaults.withCredentials = true;
+    setLoading(true);
+
+    try {
+
+        if(isCreateAccount){
+
+            const response = await axios.post(
+                `${backendURL}/register`,
+                { name, email, password }
+            );
+
+            if(response.status === 201){
+                navigate("/");
+                toast.success("Hesap başarıyla oluşturuldu.");
+            } else {
+                toast.error("E-posta zaten mevcut.");
             }
-        }catch(error){
-            toast.error(error.response.data.message);
-        }finally{
-            setLoding(false);
+
+        } else {
+            const response = await axios.post(`${backendURL}/login`, {email, password})
+            if(response.status === 200){
+                setIsLoggedIn(true);
+                getUserData();
+                navigate("/");
+            }else{
+                toast.error("Email ya da şifre hatalı.");
+            }
+
         }
 
+    } catch(error){
+
+        console.log(error);
+
+        toast.error(
+            error.response?.data?.message || "Bir hata oluştu"
+        );
+
+    } finally {
+
+        setLoading(false);
     }
+}
 
     return(
         <div className="position-relative min-vh-100 d-flex justify-content-center align-items-center"
@@ -83,7 +105,6 @@ const Login = () => {
                             </div>
 
                         )
-
 
                     }
 

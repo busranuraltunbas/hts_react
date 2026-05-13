@@ -6,7 +6,7 @@ import { AppContext } from "./AppContext";
 export const AppContextProvider = (props) => {
 
     const backendUrl = AppConstants.BACKEND_URL;
-<q></q>
+
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [userData, setUserData] = useState(false);
 
