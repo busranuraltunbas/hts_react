@@ -20,16 +20,18 @@ const Login = () => {
 
     const onSubmitHandler = async (e) => {
     e.preventDefault();
-    axios.defaults.withCredentials = true;
     setLoading(true);
 
     try {
 
         if(isCreateAccount){
 
-            const response = await axios.post(
+           const response = await axios.post(
                 `${backendURL}/register`,
-                { name, email, password }
+                { name, email, password },
+                {
+                    withCredentials: true
+                }
             );
 
             if(response.status === 201){
@@ -40,15 +42,22 @@ const Login = () => {
             }
 
         } else {
-            const response = await axios.post(`${backendURL}/login`, {email, password})
-            if(response.status === 200){
+
+            const response = await axios.post(
+                `${backendURL}/login`,
+                { email, password },
+                {
+                    withCredentials: true
+                }
+            );
+
+            if (response.status === 200) {
                 setIsLoggedIn(true);
-                getUserData();
+                await getUserData();
                 navigate("/");
-            }else{
+            } else {
                 toast.error("Email ya da şifre hatalı.");
             }
-
         }
 
     } catch(error){
