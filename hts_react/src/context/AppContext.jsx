@@ -5,18 +5,22 @@ import { toast } from "react-toastify";
 
 export const AppContext = createContext();
 
-export const AppContextProvider = (props) => {
+export const AppContextProvider = ({ children }) => {
 
     const backendURL = AppConstants.BACKEND_URL;
 
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [userData, setUserData] = useState(null);
+    const [isAuthLoading, setIsAuthLoading] = useState(true);
 
+
+    // Kullanıcının authentication durumunu kontrol eder
     useEffect(() => {
 
         const checkAuthentication = async () => {
 
             try {
+
                 const response = await axios.get(
                     `${backendURL}/is-authenticated`,
                     {
@@ -40,30 +44,30 @@ export const AppContextProvider = (props) => {
                     }
 
                 } else {
+
                     setIsLoggedIn(false);
                     setUserData(null);
+
                 }
 
             } catch (error) {
 
-                if (error.response?.status === 401) {
-                    setIsLoggedIn(false);
-                    setUserData(null);
-                    return;
-                }
-
-                if (error.response) {
-                    const msg =
-                        error.response.data?.message ||
-                        "Authentication check failed";
-
-                    toast.error(msg);
-                } else {
-                    toast.error(error.message);
-                }
-
                 setIsLoggedIn(false);
                 setUserData(null);
+
+                if (error.response?.status !== 401) {
+
+                    const message =
+                        error.response?.data?.message ||
+                        "Authentication check failed";
+
+                    toast.error(message);
+                }
+
+            } finally {
+
+                setIsAuthLoading(false);
+
             }
         };
 
@@ -72,9 +76,11 @@ export const AppContextProvider = (props) => {
     }, [backendURL]);
 
 
+    // Kullanıcı profil bilgilerini getirir
     const getUserData = async () => {
 
         try {
+
             const response = await axios.get(
                 `${backendURL}/profile`,
                 {
@@ -83,13 +89,27 @@ export const AppContextProvider = (props) => {
             );
 
             if (response.status === 200) {
+
                 setUserData(response.data);
-            } else {
-                toast.error("Profil alınamadı.");
+                setIsLoggedIn(true);
+
+                return response.data;
+
             }
 
         } catch (error) {
-            toast.error(error.message);
+
+            setIsLoggedIn(false);
+            setUserData(null);
+
+            if (error.response?.status !== 401) {
+                toast.error(
+                    error.response?.data?.message ||
+                    "Profil alınamadı."
+                );
+            }
+
+            return null;
         }
     };
 
@@ -101,11 +121,13 @@ export const AppContextProvider = (props) => {
         userData,
         setUserData,
         getUserData,
+        isAuthLoading,
     };
+
 
     return (
         <AppContext.Provider value={contextValue}>
-            {props.children}
+            {children}
         </AppContext.Provider>
     );
 };

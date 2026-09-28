@@ -39,32 +39,40 @@ const EmailVerify = () =>{
         inputRef.current[next].focus();
     }
 
-    const handleVerify = async() =>{
-        const otp = inputRef.current = inputRef.current.map(input => input.value).join("");
-        if(otp.length !== 6){
-            toast.error("Please enter all 6 digits of the OTP.")
+    const handleVerify = async () => {
+        const otp = inputRef.current.map(input => input.value).join("");
+
+        if (otp.length !== 6) {
+            toast.error("Please enter all 6 digits of the OTP.");
             return;
         }
+
         setLoading(true);
+
         try {
-            const response =  await axios.post(backendURL + "/verify-otp", {otp})
-            if (response.status == 200) {
-                toast.success("OTP verified succesfully!")
-                getUserData();
+            const response = await axios.post(
+                backendURL + "/verify-otp",
+                { otp }
+            );
+
+            if (response.status === 200) {
+                toast.success("OTP verified successfully!");
+
+                await getUserData();
+
                 navigate("/");
-            }
-            else{
+            } else {
                 toast.error("Invalid OTP");
-                
             }
+
         } catch (error) {
-            toast.error(error.response.data.message);
-            toast.error("Failed to verifY OTP. Please try again. ");
-        }
-        finally{
+            toast.error(
+                error.response?.data?.message || "Failed to verify OTP. Please try again."
+            );
+        } finally {
             setLoading(false);
         }
-    }
+    };
 
     useEffect(() =>{
         isLoggedIn && userData && userData.isAccountVerified && navigate("/");
