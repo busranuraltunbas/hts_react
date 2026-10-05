@@ -18,34 +18,40 @@ const Login = () => {
     
     
 
-    const onSubmitHandler = async (e) => {
+const onSubmitHandler = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
+        if (isCreateAccount) {
 
-        if(isCreateAccount){
-
-           const response = await axios.post(
+            const response = await axios.post(
                 `${backendURL}/register`,
-                { name, email, password },
                 {
-                    withCredentials: true
+                    name,
+                    email,
+                    password
                 }
             );
 
-            if(response.status === 201){
-                navigate("/");
-                toast.success("Hesap başarıyla oluşturuldu.");
-            } else {
-                toast.error("E-posta zaten mevcut.");
+            if (response.status === 201) {
+                toast.success(
+                    "Hesabınız oluşturuldu. E-posta adresinizi doğrulayın."
+                );
+
+                navigate("/email-verify", {
+                    state: { email }
+                });
             }
 
         } else {
 
             const response = await axios.post(
                 `${backendURL}/login`,
-                { email, password },
+                {
+                    email,
+                    password
+                },
                 {
                     withCredentials: true
                 }
@@ -55,24 +61,22 @@ const Login = () => {
                 setIsLoggedIn(true);
                 await getUserData();
                 navigate("/");
-            } else {
-                toast.error("Email ya da şifre hatalı.");
             }
         }
 
-    } catch(error){
+    } catch (error) {
 
         console.log(error);
 
         toast.error(
-            error.response?.data?.message || "Bir hata oluştu"
+            error.response?.data?.message ||
+            "Bir hata oluştu."
         );
 
     } finally {
-
         setLoading(false);
     }
-}
+};
 
     return(
         <div className="position-relative min-vh-100 d-flex justify-content-center align-items-center"
@@ -85,12 +89,12 @@ const Login = () => {
                     gap: 5,
                     alignItems: "center",
                     fontWeight: "bold",
-                    fonSize: "24px",
+                    fontSize: "24px",
                     textDecoration: "none",
                 }}>
 
                     <img src={assets.react} alt="react" height={32} width={32} />
-                    <span className="fw-bold fs-4 text-light">HTC</span>               
+                    <span className="fw-bold fs-4 text-light">HTS</span>               
                 </Link>
             </div>
             <div className="card p-4" style={{maxWidth: "400px", width:"100%"}}>
@@ -106,7 +110,7 @@ const Login = () => {
                                     type="text" 
                                     id="fullName"
                                     className="form-control"
-                                    placeholder="Enter fulname"
+                                    placeholder="Ad soyadınızı giriniz"
                                     required
                                     onChange={(e) => setName(e.target.value)}
                                     value={name}
@@ -118,34 +122,35 @@ const Login = () => {
                     }
 
                     <div className="mb-3">
-                        <label htmlFor="email" className="form-label">Email Id</label>
-                        <input 
-                            type="text" 
-                            id="email"
-                            className="form-control"
-                            placeholder="Enter email"
-                            required
-                            onChange={(e) => setEmail(e.target.value)}
-                            value={email}
-                        />
-                    </div>
+                    <label htmlFor="email" className="form-label">Email</label>
+                    <input 
+                        type="email" 
+                        id="email"
+                        className="form-control"
+                        placeholder="E-posta adresinizi giriniz"
+                        required
+                        onChange={(e) => setEmail(e.target.value)}
+                        value={email}
+                    />
+                </div>
 
                     <div className="mb-3">
                         <label htmlFor="password" className="form-label">Password</label>
                         <input 
-                            type="password" 
-                            id="password"
-                            className="form-control"
-                            placeholder="************"
-                            required
-                            onChange={(e) => setPassword(e.target.value)}
-                            value={password}
-                        />
+                        type="password"
+                        id="password"
+                        className="form-control"
+                        placeholder="************"
+                        minLength={6}
+                        required
+                        onChange={(e) => setPassword(e.target.value)}
+                        value={password}
+                    />
                     </div>
 
                     <div className="d-flex justify-content-between mb-3">
                         <Link to="/reset-password" className="text-decoration-none">
-                            Forgot pasword?
+                            Şifremi unuttum
                         </Link>
 
                     </div>

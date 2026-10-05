@@ -16,16 +16,12 @@ export const AppContextProvider = ({ children }) => {
 
     // Kullanıcının authentication durumunu kontrol eder
     useEffect(() => {
-
         const checkAuthentication = async () => {
 
             try {
-
                 const response = await axios.get(
                     `${backendURL}/is-authenticated`,
-                    {
-                        withCredentials: true
-                    }
+                    { withCredentials: true }
                 );
 
                 if (response.status === 200 && response.data === true) {
@@ -34,9 +30,7 @@ export const AppContextProvider = ({ children }) => {
 
                     const profileResponse = await axios.get(
                         `${backendURL}/profile`,
-                        {
-                            withCredentials: true
-                        }
+                        { withCredentials: true }
                     );
 
                     if (profileResponse.status === 200) {
@@ -44,10 +38,8 @@ export const AppContextProvider = ({ children }) => {
                     }
 
                 } else {
-
                     setIsLoggedIn(false);
                     setUserData(null);
-
                 }
 
             } catch (error) {
@@ -56,18 +48,11 @@ export const AppContextProvider = ({ children }) => {
                 setUserData(null);
 
                 if (error.response?.status !== 401) {
-
-                    const message =
-                        error.response?.data?.message ||
-                        "Authentication check failed";
-
-                    toast.error(message);
+                    console.log("Authentication check failed:", error);
                 }
 
             } finally {
-
                 setIsAuthLoading(false);
-
             }
         };
 
@@ -113,6 +98,29 @@ export const AppContextProvider = ({ children }) => {
         }
     };
 
+    const logout = async () => {
+        try {
+            await axios.post(
+                `${backendURL}/logout`,
+                {},
+                { withCredentials: true }
+            );
+
+            setIsLoggedIn(false);
+            setUserData(null);
+
+            toast.success("Başarıyla çıkış yapıldı.");
+
+        } catch (error) {
+            console.log("Logout error:", error);
+
+            setIsLoggedIn(false);
+            setUserData(null);
+
+            toast.error("Çıkış yapılırken bir hata oluştu.");
+        }
+    };
+
 
     const contextValue = {
         backendURL,
@@ -122,7 +130,8 @@ export const AppContextProvider = ({ children }) => {
         setUserData,
         getUserData,
         isAuthLoading,
-    };
+        logout,
+};
 
 
     return (
