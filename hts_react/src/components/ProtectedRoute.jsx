@@ -4,7 +4,10 @@ import { AppContext } from "../context/AppContext.jsx";
 
 const ProtectedRoute = ({ children }) => {
 
-    const { isLoggedIn, isAuthLoading } = useContext(AppContext);
+    const {
+        isLoggedIn,
+        isAuthLoading
+    } = useContext(AppContext);
 
     if (isAuthLoading) {
         return <div>Yükleniyor...</div>;
